@@ -1,0 +1,30 @@
+{
+    "$schema": "https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/schema/library.json",
+    "name": "LorenzOS",
+    "version": "1.0.1",
+    "description": "Lorenz Operating System",
+    "keywords": "os",
+    "authors": [
+        {
+            "name": "Lorenz Görne"
+        }
+    ],
+    "license": "MIT",
+    "frameworks": [
+        "arduino"
+    ],
+    "platforms": [
+        "espressif8266"
+    ],
+    "dependencies": {
+        "arduino-libraries/ntpclient": "*",
+        "ArduinoOTA": "*",
+        "robtillaart/CRC": "*",
+        "jchristensen/Timezone": "*",
+        "CycleLimit": "*",
+        "WifiSetup": "*"
+    },
+    "build": {
+        "extraScript": "build_tools\\main.py"
+    }
+}
