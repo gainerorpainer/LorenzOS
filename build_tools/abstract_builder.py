@@ -9,6 +9,7 @@ from pathlib import Path
 @dataclass
 class _AttributedFunction:
     header_file_name: str
+    name: str
     qualified_name: str
     attribute_arg: str
 
@@ -89,6 +90,6 @@ class AbstractBuilder:
                 qualifiers = [
                     containing_namespace.qualified_name if containing_namespace else ""] + [function_match[3]]
                 function = _AttributedFunction(
-                    Path(file_path).name, "::".join(qualifiers), function_match[2])
+                    Path(file_path).name, function_match[3], "::".join(qualifiers), function_match[2])
                 functions.append(function)
         return functions

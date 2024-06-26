@@ -21,10 +21,14 @@
         "ArduinoOTA": "*",
         "robtillaart/CRC": "*",
         "jchristensen/Timezone": "*",
+        "paulstoffregen/Time": "*",
         "CycleLimit": "*",
         "WifiSetup": "*"
     },
     "build": {
         "extraScript": "build_tools\\main.py"
+    },
+    "scripts": {
+        "postinstall": "postinstall.py"
     }
 }
