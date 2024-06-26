@@ -3,7 +3,9 @@
 ## What is it?
 
 This is a platform IO library meant to simplify project development for ESP8266 based boards.
-It is therefore only compatible with ESP8266 with Arduino framework
+It is therefore only compatible with ESP8266 with Arduino framework.
+
+**Warning**: This is still in delevopment, if you are interested in the development, let me know!
 
 ## What can it do?
 
@@ -25,3 +27,4 @@ Additionally, automatic build tools are added to the project during installation
 ## What will be improved
 
 * more documentation
+* examples 
