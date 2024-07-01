@@ -13,10 +13,12 @@ class _TaskDefinition:
 class TaskBuilder(AbstractBuilder):
     """Builder class for tasks
     """
+
     def __init__(self, include_folder: str):
         super().__init__("tasks", include_folder)
-        functions = self._crawl_folder("task_with_interval")
-        self.tasks = [_TaskDefinition(function.qualified_name, int(function.attribute_arg)) for function in functions]
+        functions = self._search_functions("task_with_interval")
+        self.tasks = [_TaskDefinition(function.qualified_name, int(
+            function.attribute_arg)) for function in functions]
         for task in self.tasks:
             print(f"Found task: {task}")
         # find containing set of header files

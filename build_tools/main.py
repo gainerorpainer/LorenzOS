@@ -3,6 +3,7 @@ import os
 
 from task_builder import TaskBuilder
 from http_server_builder import HttpServerBuilder
+from parameters_builder import ParametersBuilder
 from html_builder import build_html
 
 Import("env")
@@ -15,6 +16,10 @@ print()
 
 print("Building \"http_server\"...")
 HttpServerBuilder(include_folder).build()
+print()
+
+print("Building \"parameters\"...")
+ParametersBuilder(include_folder).build()
 print()
 
 print("Building \"html\"...")

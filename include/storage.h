@@ -45,8 +45,18 @@ namespace LOS::Storage
         /// @remark If loading fails, default creates parameters and stores them into eprom
         StorageHandler()
         {
+            Serial.println("Loading EEPROM data...");
+
             EEPROM.begin(sizeof(PermanentData_t));
             EEPROM.get(0, Data);
+
+            if (getCrc(Data.WifiConfig) != Data.WifiCRC)
+            {
+                Serial.println("WifiConfig CRC err, defaults have been restored");
+                // load default WifiConfig and store into eprom
+                WifiConfig = WifiConfig_t{};
+                storeToEEprom();
+            }
 
             Serial.println("Wifi Config:");
             Serial.println("\tSSID: " + Data.WifiConfig.SSID.asStr());
@@ -62,7 +72,7 @@ namespace LOS::Storage
             // validate parameters
             if (getCrc(Data.__parameter_data) != Data.ParametersCRC)
             {
-                Serial.println("Could not load parameters, defaults have been restored");
+                Serial.println("Parameters CRC err, defaults have been restored");
                 // load default parameters and store into eprom
                 setParameters(PARAMETER_T{});
                 storeToEEprom();

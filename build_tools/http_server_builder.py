@@ -14,7 +14,7 @@ class HttpServerBuilder(AbstractBuilder):
     """Http server builder"""
     def __init__(self, include_folder: str):
         super().__init__("http_server", include_folder)
-        functions = self._crawl_folder("http_server_bind_to")
+        functions = self._search_functions("http_server_bind_to")
         self.callbacks = [_CbDefinition(function.qualified_name, function.attribute_arg) for function in functions]
         for callback in self.callbacks:
             print(f"Found server callback: {callback}")

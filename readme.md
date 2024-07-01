@@ -28,3 +28,9 @@ Additionally, automatic build tools are added to the project during installation
 
 * more documentation
 * examples 
+
+## changelog
+
+### 1.0.2
+
+* Added codegenerator for parameters class - will auto generate code for serialize and deserialize of class with attribute

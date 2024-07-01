@@ -7,8 +7,9 @@ from pathlib import Path
 
 
 @dataclass
-class _AttributedFunction:
+class _AttributedCodeObject:
     header_file_name: str
+    occurence_span: tuple[int, int]
     name: str
     qualified_name: str
     attribute_arg: str
@@ -25,14 +26,16 @@ class AbstractBuilder:
     """Base class for all builders"""
     CODEGENERATED_RE = re.compile(r"\/\* _CODEGENERATED_(.*?) \*\/")
     NAMESPACE_RE = re.compile(r"namespace (.*?)\s*\{((?:.*\n.*)+)\}")
-    FUNCTION_RE = re.compile(
-        r"(?:\w+)\s+(\w+)\(\)\s+__attribute__\(\((\w+)\(((?:[\w]+)|(?:\".*\"))\)\)\);")
+    _ATTRIBUTE_RE = r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]"
     ATTR_FUNCTION_RE = re.compile(
         r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]\s+(?:\w+)\s+(\w+)\(\);")
+    ATTR_CLASS_RE = re.compile(
+        r"(?:struct|class)\s+" + _ATTRIBUTE_RE + r"\s+(.*)\s+{(?:.|\n)*}")
 
     def __init__(self, context: str, include_folder: str):
         self.context = context
         self.include_folder = include_folder
+        self.do_not_build = False
 
     def _generate_block(self, blockname: str) -> list[str]:
         raise NotImplementedError("Abstract function")
@@ -40,6 +43,10 @@ class AbstractBuilder:
     def build(self):
         """Writes to the codegen_*.h files
         """
+        if self.do_not_build:
+            print("Nothing to build, skipping")
+            return
+
         out_header_filepath = f"{self.include_folder}/codegen_{self.context}.h"
         with open(f"codegen_{self.context}.h", "r", encoding="utf8") as templatefile, open(out_header_filepath, "w+", encoding="utf8") as sourcefile:
             template = templatefile.readlines()
@@ -57,8 +64,8 @@ class AbstractBuilder:
                 sourcefile.write(line)
         print(f"Built header file: {out_header_filepath}")
 
-    def _crawl_folder(self, attribute_name: str) -> list[_AttributedFunction]:
-        functions = []  # type: list[_AttributedFunction]
+    def __search_objects(self, attribute_name: str, regex: re.Pattern[str]) -> list[_AttributedCodeObject]:
+        objects = []  # type: list[_AttributedCodeObject]
         for file_path in glob(f"{self.include_folder}\\*.h"):
             with open(file_path, "r", encoding="utf8") as f:
                 content = f.read()
@@ -80,16 +87,22 @@ class AbstractBuilder:
             # shorter namespaces are more specific and should come first
             namespaces = sorted(namespaces, key=lambda x: x.end - x.start)
 
-            # find all functions
-            for function_match in AbstractBuilder.ATTR_FUNCTION_RE.finditer(content):
-                if function_match[1] != attribute_name:
+            # find all objects
+            for obj_match in regex.finditer(content):
+                if obj_match[1] != attribute_name:
                     continue
-                span = function_match.span()
+                span = obj_match.span()
                 containing_namespace = next(
                     (namespace for namespace in namespaces if span[0] >= namespace.start and span[1] <= namespace.end), None)
                 qualifiers = [
-                    containing_namespace.qualified_name if containing_namespace else ""] + [function_match[3]]
-                function = _AttributedFunction(
-                    Path(file_path).name, function_match[3], "::".join(qualifiers), function_match[2])
-                functions.append(function)
-        return functions
+                    containing_namespace.qualified_name if containing_namespace else ""] + [obj_match[3]]
+                obj = _AttributedCodeObject(
+                    Path(file_path).name, span, obj_match[3], "::".join(qualifiers), obj_match[2])
+                objects.append(obj)
+        return objects
+
+    def _search_functions(self, attribute_name: str):
+        return self.__search_objects(attribute_name, AbstractBuilder.ATTR_FUNCTION_RE)
+
+    def _search_classes(self, attribute_name: str):
+        return self.__search_objects(attribute_name, AbstractBuilder.ATTR_CLASS_RE)
