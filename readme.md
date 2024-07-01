@@ -27,7 +27,7 @@ Additionally, automatic build tools are added to the project during installation
 ## What will be improved
 
 * more documentation
-* examples 
+* examples
 
 ## changelog
 

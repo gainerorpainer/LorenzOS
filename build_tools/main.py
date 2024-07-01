@@ -3,7 +3,7 @@ import os
 
 from task_builder import TaskBuilder
 from http_server_builder import HttpServerBuilder
-from parameters_builder import ParametersBuilder
+from serializable_builder import SerializableBuilder
 from html_builder import build_html
 
 Import("env")
@@ -19,7 +19,7 @@ HttpServerBuilder(include_folder).build()
 print()
 
 print("Building \"parameters\"...")
-ParametersBuilder(include_folder).build()
+SerializableBuilder(include_folder).build()
 print()
 
 print("Building \"html\"...")
