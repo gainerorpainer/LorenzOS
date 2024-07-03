@@ -1,17 +1,16 @@
 """Implements a builder for tasks"""
 import re
 from dataclasses import dataclass
-
-from abstract_builder import AbstractBuilder
+from abstract_builder import OneToOneBuilder, _AttributedCodeObject
 
 
 @dataclass
-class _Serializable_Class:
+class _SerializableClass:
     name: str
     fields: list[str]
 
 
-class SerializableBuilder(AbstractBuilder):
+class SerializableBuilder(OneToOneBuilder):
     """Builder class for serializable"""
 
     STRUCT_FIELD_RE = re.compile(
@@ -23,14 +22,7 @@ class SerializableBuilder(AbstractBuilder):
         # find containing set of header files
         self.header_files = set(
             (_class.header_file_name for _class in classes))
-        self.classes = []  # type: list[_Serializable_Class]
-        if len(classes) > 1:
-            raise OverflowError("Too many attributed classes:" + repr(classes))
-        if len(classes) == 0:
-            print("No paramters class found")
-            self.do_not_build = True
-            return
-
+        self.classes = {} # type: dict[_AttributedCodeObject, _SerializableClass]
         for _class in classes:
             print(f"Found class: {_class}")
             # parse class content to find fields
@@ -39,26 +31,30 @@ class SerializableBuilder(AbstractBuilder):
             ) as f:
                 content = f.read()
                 # trim to known occurence
-                content = content[_class.occurence_span[0]
-                    : _class.occurence_span[1]]
+                content = content[_class.occurence_span[0]:_class.occurence_span[1]]
+            fields = []  # type: list[str]
             for field_match in SerializableBuilder.STRUCT_FIELD_RE.finditer(content):
-                self.classes.append(field_match[2])
+                fields.append(field_match[2])
+            self.classes[_class] = _SerializableClass(_class.name, fields)
 
-    def _generate_block(self, blockname: str) -> list[str]:
+    def _generate_block_for(self, obj: _AttributedCodeObject, blockname: str) -> list[str]:
         match blockname.lower():
-            case "includes":
-                return [f'#include "{headerfile}"' for headerfile in self.header_files]
+            case "include":
+                return [f'#include "{obj.header_file_name}"']
+            case "ns":
+                return [obj.name]
             case "write":
-                return [f'doc["{field}"] = in.{field};' for field in self.fields]
+                return [f'doc["{field}"] = in.{field};' for field in self.classes[obj].fields]
             case "read":
+                fields = self.classes[obj].fields
                 temporaries = [
-                    f'JsonVariant {field} = doc["{field}"];' for field in self.fields
+                    f'JsonVariant {field} = doc["{field}"];' for field in fields
                 ]
                 null_check = [
                     "if ("
-                    + " || ".join([f"{field}.isNull()" for field in self.fields])
+                    + " || ".join([f"{field}.isNull()" for field in fields])
                     + ")",
                     "\treturn false;"
                 ]
-                writes = [f"out.{field} = {field};" for field in self.fields]
+                writes = [f"out.{field} = {field};" for field in fields]
                 return temporaries + [""] + null_check + [""] + writes

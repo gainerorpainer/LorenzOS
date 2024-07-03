@@ -41,7 +41,7 @@ class AbstractBuilder:
         raise NotImplementedError("Abstract function")
 
     def build(self):
-        """Writes to the codegen_*.h files
+        """Builds a codegen_*.h file into a single file
         """
         if self.do_not_build:
             print("Nothing to build, skipping")
@@ -106,3 +106,42 @@ class AbstractBuilder:
 
     def _search_classes(self, attribute_name: str):
         return self.__search_objects(attribute_name, AbstractBuilder.ATTR_CLASS_RE)
+
+
+class OneToOneBuilder(AbstractBuilder):
+    def build(self):
+        raise NotImplementedError("Closed by inheritance")
+
+    """Builds files for each code object"""
+
+    def build_all(self, objects: list[_AttributedCodeObject]):
+        """Builds one codegen_*.h file for all objects
+
+        Args:
+            objects (list[_AttributedCodeObject]): input objects
+        """
+        if self.do_not_build:
+            print("Nothing to build, skipping")
+            return
+
+        for obj in objects:
+            out_header_filepath = f"{
+                self.include_folder}/codegen_{self.context}_{obj}.h"
+            with open(f"codegen_{self.context}.h", "r", encoding="utf8") as templatefile, open(out_header_filepath, "w+", encoding="utf8") as sourcefile:
+                template = templatefile.readlines()
+                for line in template:
+                    match = AbstractBuilder.CODEGENERATED_RE.search(line)
+                    if match:
+                        blockname = match[1]
+                        span = match.span()
+                        indentation = span[0]
+                        block_lines = self._generate_block(blockname)
+                        block_formatted = (
+                            "\n" + "".join(repeat(" ", indentation))).join(block_lines)
+                        line = line[0:span[0]] + \
+                            block_formatted + line[span[1]:]
+                    sourcefile.write(line)
+            print(f"Built header file: {out_header_filepath}")
+
+    def _generate_block_for(self, obj: _AttributedCodeObject, blockname: str) -> list[str]:
+        raise NotImplementedError("Abstract function")
