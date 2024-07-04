@@ -1,22 +1,21 @@
 #pragma once
 
-#include <stdexcept>
-
 #include <ArduinoJson.h>
 
 /* _CODEGENERATED_INCLUDES */
 
 namespace codegen::Serializable
 {
+    /* _CODEGENERATED_PLACEHOLDER BEGIN */
     /// @brief Turns parameters into json
     /// @param in the parameters to serialze
     /// @param out will be cleared and written to
     /// @return the length of the string
-    [[noreturn]]
     template <typename T>
-    static inline int serialize(T const &in, String &out)
+    [[noreturn]]
+    int serialize(T const &in, String &out)
     {
-        throw std::bad_function_call{"not implemented"};
+        return 0;
     }
 
     /// @brief Attempts to parse as json
@@ -24,10 +23,11 @@ namespace codegen::Serializable
     /// @param out unchanged or if true is returned, the parsed data
     /// @return true if successful
     template <typename T>
-    static inline bool tryParse(char const *in, T &out)
+    [[noreturn]]
+    bool tryParse(char const *in, T &out)
     {
-        throw std::bad_function_call{"not implemented"};
+        throw std::logic_error{"not implemented"};
     }
-
+    /* _CODEGENERATED_PLACEHOLDER END */
     /* _CODEGENERATED_FRAGMENTS */
 }

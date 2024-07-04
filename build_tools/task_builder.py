@@ -25,8 +25,8 @@ class TaskBuilder(AbstractBuilder):
         self.header_files = set(
             (function.header_file_name for function in functions))
 
-    def _generate_block(self, blockname: str) -> list[str]:
-        match blockname.lower():
+    def _generate_block(self, blockname: str, _: str) -> list[str]:
+        match blockname:
             case "fcalls":
                 return [f"{task.qualified_name}();" for task in self.tasks]
             case "includes":

@@ -4,6 +4,7 @@ from glob import glob
 from itertools import repeat
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
 
 @dataclass
@@ -24,7 +25,7 @@ class _Namespace:
 
 class AbstractBuilder:
     """Base class for all builders"""
-    CODEGENERATED_RE = re.compile(r"\/\* _CODEGENERATED_(.*?) \*\/")
+    CODEGENERATED_RE = re.compile(r"\/\* _CODEGENERATED_(.*?) (?:(.*) )?\*\/")
     NAMESPACE_RE = re.compile(r"namespace (.*?)\s*\{((?:.*\n.*)+)\}")
     _ATTRIBUTE_RE = r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]"
     ATTR_FUNCTION_RE = re.compile(
@@ -37,7 +38,7 @@ class AbstractBuilder:
         self.include_folder = include_folder
         self.do_not_build = False
 
-    def _generate_block(self, blockname: str) -> list[str]:
+    def _generate_block(self, blockname: str, indentation: str) -> list[str]:
         raise NotImplementedError("Abstract function")
 
     def build(self):
@@ -47,21 +48,10 @@ class AbstractBuilder:
             print("Nothing to build, skipping")
             return
 
-        out_header_filepath = f"{self.include_folder}/codegen_{self.context}.h"
+        out_header_filepath = f"{self.include_folder}\\codegen_{self.context}.h"
         with open(f"codegen_{self.context}.h", "r", encoding="utf8") as templatefile, open(out_header_filepath, "w+", encoding="utf8") as sourcefile:
-            template = templatefile.readlines()
-            for line in template:
-                match = AbstractBuilder.CODEGENERATED_RE.search(line)
-                if match:
-                    blockname = match[1]
-                    span = match.span()
-                    indentation = span[0]
-                    block_lines = self._generate_block(blockname)
-                    block_formatted = (
-                        "\n" + "".join(repeat(" ", indentation))).join(block_lines)
-                    line = line[0:span[0]] + \
-                        block_formatted + line[span[1]:]
-                sourcefile.write(line)
+            sourcefile.writelines(AbstractBuilder._build_template(
+                templatefile.readlines(), self._generate_block))
         print(f"Built header file: {out_header_filepath}")
 
     def __search_objects(self, attribute_name: str, regex: re.Pattern[str]) -> list[_AttributedCodeObject]:
@@ -107,41 +97,34 @@ class AbstractBuilder:
     def _search_classes(self, attribute_name: str):
         return self.__search_objects(attribute_name, AbstractBuilder.ATTR_CLASS_RE)
 
+    @staticmethod
+    def _build_template(template: list[str], block_resolver: Callable[[str, int], list[str]]) -> list[str]:
+        out_buffer = []  # type: list[str]
+        placeholder_active = False
+        for line in template:
+            match = AbstractBuilder.CODEGENERATED_RE.search(line)
+            if match:
+                blockname = match[1].lower()
 
-class OneToOneBuilder(AbstractBuilder):
-    def build(self):
-        raise NotImplementedError("Closed by inheritance")
+                # placeholder handling
+                if blockname == "placeholder":
+                    placeholder_active = match[2] == "BEGIN"
+                    continue
 
-    """Builds files for each code object"""
+                span = match.span()
+                indentation = "".join(repeat(" ", span[0]))
+                block_lines = block_resolver(blockname, indentation)
+                if block_lines is None or len(block_lines) == 0:
+                    raise NotImplementedError(
+                        f"{repr(block_resolver)} does not resolve the blockname \"{blockname}\"")
+                if len(block_lines) == 1:
+                    line = line[0:span[0]] + block_lines[0] + line[span[1]:]
+                else:
+                    line = indentation + f"\n{indentation}".join(block_lines)
 
-    def build_all(self, objects: list[_AttributedCodeObject]):
-        """Builds one codegen_*.h file for all objects
+            if placeholder_active:
+                continue
 
-        Args:
-            objects (list[_AttributedCodeObject]): input objects
-        """
-        if self.do_not_build:
-            print("Nothing to build, skipping")
-            return
+            out_buffer.append(line)
 
-        for obj in objects:
-            out_header_filepath = f"{
-                self.include_folder}/codegen_{self.context}_{obj}.h"
-            with open(f"codegen_{self.context}.h", "r", encoding="utf8") as templatefile, open(out_header_filepath, "w+", encoding="utf8") as sourcefile:
-                template = templatefile.readlines()
-                for line in template:
-                    match = AbstractBuilder.CODEGENERATED_RE.search(line)
-                    if match:
-                        blockname = match[1]
-                        span = match.span()
-                        indentation = span[0]
-                        block_lines = self._generate_block(blockname)
-                        block_formatted = (
-                            "\n" + "".join(repeat(" ", indentation))).join(block_lines)
-                        line = line[0:span[0]] + \
-                            block_formatted + line[span[1]:]
-                    sourcefile.write(line)
-            print(f"Built header file: {out_header_filepath}")
-
-    def _generate_block_for(self, obj: _AttributedCodeObject, blockname: str) -> list[str]:
-        raise NotImplementedError("Abstract function")
+        return out_buffer

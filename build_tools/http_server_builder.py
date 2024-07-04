@@ -22,8 +22,8 @@ class HttpServerBuilder(AbstractBuilder):
         self.header_files = set(
             (function.header_file_name for function in functions))
 
-    def _generate_block(self, blockname: str) -> list[str]:
-        match blockname.lower():
+    def _generate_block(self, blockname: str, _: str) -> list[str]:
+        match blockname:
             case "register":
                 return [f"LOS::_HttpServer.on({cb.ressource_str}, {cb.qualified_name});" for cb in self.callbacks]
             case "includes":

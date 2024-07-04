@@ -1,9 +1,8 @@
-/// @brief Turns /* CODEGENERATED_TYPE */ into json
-/// @param in the /* CODEGENERATED_TYPE */ to serialze
+/// @brief Turns /* _CODEGENERATED_TYPE */ into json
+/// @param in the /* _CODEGENERATED_TYPE */ to serialze
 /// @param out will be cleared and written to
 /// @return the length of the string
-template <>
-static inline int serialize(/* CODEGENERATED_TYPE */ const &in, String &out)
+int serialize(/* _CODEGENERATED_QUALIFIED_TYPE */ const &in, String &out)
 {
     // reset buffer just in case
     out.clear();
@@ -14,12 +13,11 @@ static inline int serialize(/* CODEGENERATED_TYPE */ const &in, String &out)
     return serializeJson(doc, out);
 }
 
-/// @brief Attempts to parse /* CODEGENERATED_TYPE */ as json
+/// @brief Attempts to parse /* _CODEGENERATED_TYPE */ from json
 /// @param in the string to parse
 /// @param out unchanged or if true is returned, the parsed data
 /// @return true if successful
-template <>
-static inline bool tryParse(char const *in, /* CODEGENERATED_TYPE */ &out)
+bool tryParse(char const *in, /* _CODEGENERATED_QUALIFIED_TYPE */ &out)
 {
     JsonDocument doc{};
     DeserializationError const error = deserializeJson(doc, in);
