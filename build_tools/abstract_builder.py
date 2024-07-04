@@ -120,7 +120,7 @@ class AbstractBuilder:
                 if len(block_lines) == 1:
                     line = line[0:span[0]] + block_lines[0] + line[span[1]:]
                 else:
-                    line = indentation + f"\n{indentation}".join(block_lines)
+                    line = indentation + f"\n{indentation}".join(block_lines) + "\n"
 
             if placeholder_active:
                 continue
