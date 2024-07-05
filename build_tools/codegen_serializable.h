@@ -12,7 +12,6 @@ namespace codegen::Serializable
     /// @param out will be cleared and written to
     /// @return the length of the string
     template <typename T>
-    [[noreturn]]
     int serialize(T const &in, String &out)
     {
         return 0;
@@ -23,10 +22,9 @@ namespace codegen::Serializable
     /// @param out unchanged or if true is returned, the parsed data
     /// @return true if successful
     template <typename T>
-    [[noreturn]]
     bool tryParse(char const *in, T &out)
     {
-        throw std::logic_error{"not implemented"};
+        return false;
     }
     /* _CODEGENERATED_PLACEHOLDER END */
     /* _CODEGENERATED_FRAGMENTS */

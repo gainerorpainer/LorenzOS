@@ -31,10 +31,15 @@ Additionally, automatic build tools are added to the project during installation
 
 ## changelog
 
-### 1.0.2
+### 1.2.0
 
-* Added codegenerator for parameters class - will auto generate code for serialize and deserialize of class with attribute
+* **Breaking Change**: `serializable` can not be "read-only", which can be controlled by the passed attribute argument
+* `serializable` classes can now state extension functions, which allows the user to add own fields to the codegenerated serialization
 
 ### 1.1.0
 
 * **Breaking Change**: parameters are now changed to `serializable` with a more broad application
+
+### 1.0.2
+
+* Added codegenerator for parameters class - will auto generate code for serialize and deserialize of class with attribute

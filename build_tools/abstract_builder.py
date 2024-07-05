@@ -8,12 +8,23 @@ from typing import Callable
 
 
 @dataclass
-class _AttributedCodeObject:
+class _AttributedClass:
     header_file_name: str
     occurence_span: tuple[int, int]
+    attribute_arg: str
     name: str
     qualified_name: str
+
+
+@dataclass
+class _AttributedFunction:
+    header_file_name: str
+    occurence_span: tuple[int, int]
     attribute_arg: str
+    name: str
+    qualified_name: str
+    return_type: str
+    arguments: str
 
 
 @dataclass
@@ -23,13 +34,20 @@ class _Namespace:
     end: int
 
 
+@dataclass
+class _SearchResult:
+    filename: str
+    match: re.Match[str]
+    namespaces: list[_Namespace]
+
+
 class AbstractBuilder:
     """Base class for all builders"""
     CODEGENERATED_RE = re.compile(r"\/\* _CODEGENERATED_(.*?) (?:(.*) )?\*\/")
     NAMESPACE_RE = re.compile(r"namespace (.*?)\s*\{((?:.*\n.*)+)\}")
     _ATTRIBUTE_RE = r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]"
     ATTR_FUNCTION_RE = re.compile(
-        r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]\s+(?:\w+)\s+(\w+)\(\);")
+        r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]\s+(\w+)\s+(\w+)\((.*)\);")
     ATTR_CLASS_RE = re.compile(
         r"(?:struct|class)\s+" + _ATTRIBUTE_RE + r"\s+(.*)\s+{(?:.|\n)*}")
 
@@ -54,8 +72,8 @@ class AbstractBuilder:
                 templatefile.readlines(), self._generate_block))
         print(f"Built header file: {out_header_filepath}")
 
-    def __search_objects(self, attribute_name: str, regex: re.Pattern[str]) -> list[_AttributedCodeObject]:
-        objects = []  # type: list[_AttributedCodeObject]
+    def __search_objects(self, regex: re.Pattern[str]) -> list[_SearchResult]:
+        result = []  # type: list[_SearchResult]
         for file_path in glob(f"{self.include_folder}\\*.h"):
             with open(file_path, "r", encoding="utf8") as f:
                 content = f.read()
@@ -79,23 +97,41 @@ class AbstractBuilder:
 
             # find all objects
             for obj_match in regex.finditer(content):
-                if obj_match[1] != attribute_name:
-                    continue
-                span = obj_match.span()
-                containing_namespace = next(
-                    (namespace for namespace in namespaces if span[0] >= namespace.start and span[1] <= namespace.end), None)
-                qualifiers = [
-                    containing_namespace.qualified_name if containing_namespace else ""] + [obj_match[3]]
-                obj = _AttributedCodeObject(
-                    Path(file_path).name, span, obj_match[3], "::".join(qualifiers), obj_match[2])
-                objects.append(obj)
+                result.append(_SearchResult(Path(file_path).name, obj_match, namespaces))
+        return result
+
+    def _search_functions(self, attribute_name: str) -> list[_AttributedFunction]:
+        found_objects = self.__search_objects(AbstractBuilder.ATTR_FUNCTION_RE)
+        # find all objects
+        objects = []  # type: list[_AttributedFunction]
+        for obj in found_objects:
+            if obj.match[1] != attribute_name:
+                continue
+            span = obj.match.span()
+            containing_namespace = next(
+                (namespace for namespace in obj.namespaces if span[0] >= namespace.start and span[1] <= namespace.end), None)
+            qualifiers = [
+                containing_namespace.qualified_name if containing_namespace else ""] + [obj.match[4]]
+            obj = _AttributedFunction(obj.filename, span, obj.match[2], obj.match[4], "::".join(
+                qualifiers), obj.match[3], obj.match[5])
+            objects.append(obj)
         return objects
 
-    def _search_functions(self, attribute_name: str):
-        return self.__search_objects(attribute_name, AbstractBuilder.ATTR_FUNCTION_RE)
-
-    def _search_classes(self, attribute_name: str):
-        return self.__search_objects(attribute_name, AbstractBuilder.ATTR_CLASS_RE)
+    def _search_classes(self, attribute_name: str) -> list[_AttributedClass]:
+        found_objects = self.__search_objects(AbstractBuilder.ATTR_CLASS_RE)
+        # find all objects
+        objects = []  # type: list[_AttributedClass]
+        for obj in found_objects:
+            if obj.match[1] != attribute_name:
+                continue
+            span = obj.match.span()
+            containing_namespace = next(
+                (namespace for namespace in obj.namespaces if span[0] >= namespace.start and span[1] <= namespace.end), None)
+            qualifiers = [
+                containing_namespace.qualified_name if containing_namespace else ""] + [obj.match[3]]
+            obj = _AttributedClass(obj.filename, span, obj.match[2], obj.match[3], "::".join(qualifiers))
+            objects.append(obj)
+        return objects
 
     @staticmethod
     def _build_template(template: list[str], block_resolver: Callable[[str, int], list[str]]) -> list[str]:
@@ -114,13 +150,16 @@ class AbstractBuilder:
                 span = match.span()
                 indentation = "".join(repeat(" ", span[0]))
                 block_lines = block_resolver(blockname, indentation)
-                if block_lines is None or len(block_lines) == 0:
+                if block_lines is None:
                     raise NotImplementedError(
                         f"{repr(block_resolver)} does not resolve the blockname \"{blockname}\"")
+                if len(block_lines) == 0:
+                    continue
                 if len(block_lines) == 1:
                     line = line[0:span[0]] + block_lines[0] + line[span[1]:]
                 else:
-                    line = indentation + f"\n{indentation}".join(block_lines) + "\n"
+                    line = indentation + \
+                        f"\n{indentation}".join(block_lines) + "\n"
 
             if placeholder_active:
                 continue
