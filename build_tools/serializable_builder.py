@@ -94,8 +94,7 @@ class SerializableBuilder(AbstractBuilder):
             case "qualified_type":
                 return [_class.qualified_name]
             case "write":
-                lines = [f'{indentation}doc["{field}"] = in.{
-                    field};' for field in _class.fields]
+                lines = [f'{indentation}doc["{field}"] = in.{field};' for field in _class.fields]
                 # remove indentation from first item
                 lines[0] = lines[0][len(indentation):]
                 return lines
@@ -112,8 +111,7 @@ class SerializableBuilder(AbstractBuilder):
                     + ")",
                     f"{indentation}\treturn false;"
                 ]
-                writes = [f"{indentation}out.{field} = {
-                    field};" for field in fields]
+                writes = [f"{indentation}out.{field} = {field};" for field in fields]
                 lines = temporaries + [""] + null_check + [""] + writes
                 # remove indentation from first item
                 lines[0] = lines[0][len(indentation):]

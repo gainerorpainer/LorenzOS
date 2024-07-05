@@ -43,26 +43,11 @@ namespace LOS::Storage
         /// @param data Target to load data into
         /// @return If data loaded from eeprom has valid crc
         /// @remark If loading fails, default creates parameters and stores them into eprom
-        StorageHandler()
-        {
-            Serial.println("Loading EEPROM data...");
+        StorageHandler();
 
-            EEPROM.begin(sizeof(PermanentData_t));
-            EEPROM.get(0, Data);
-
-            if (getCrc(Data.WifiConfig) != Data.WifiCRC)
-            {
-                Serial.println("WifiConfig CRC err, defaults have been restored");
-                // load default WifiConfig and store into eprom
-                WifiConfig = WifiConfig_t{};
-                storeToEEprom();
-            }
-
-            Serial.println("Wifi Config:");
-            Serial.println("\tSSID: " + Data.WifiConfig.SSID.asStr());
-            Serial.println("\tPW: " + Data.WifiConfig.Password.asStr());
-            Serial.println("\tHostname: " + Data.WifiConfig.HostName.asStr());
-        }
+        /// @brief Save parameters to permanent storage
+        /// @remark Refreshes CRC for data
+        void storeToEEprom();
 
         template <typename PARAMETER_T>
         bool getParameters(PARAMETER_T &out)
@@ -89,18 +74,6 @@ namespace LOS::Storage
             static_assert(sizeof(PARAMETER_T) <= sizeof(PermanentData_t::__parameter_data));
 
             std::memcpy(Data.__parameter_data, &in, sizeof(PARAMETER_T));
-        }
-
-        /// @brief Save parameters to permanent storage
-        /// @remark Refreshes CRC for data
-        void storeToEEprom()
-        {
-            // refresh crc
-            Data.ParametersCRC = getCrc(Data.__parameter_data);
-            Data.WifiCRC = getCrc(Data.WifiConfig);
-
-            EEPROM.put(0, Data);
-            EEPROM.commit();
         }
     };
 }

@@ -1,6 +1,7 @@
 """Builds html into static content"""
 from glob import glob
 from pathlib import Path
+from os.path import exists
 
 
 def _build_html(html_path: str, include_folder: str):
@@ -38,8 +39,9 @@ def _build_favicon(html_folder: str, include_folder: str):
 def build_html(html_folder: str, include_folder: str):
     """Builds all encountered html files
     """
-    _build_favicon(html_folder, include_folder)
-    print("Built \"favicon.ico\"")
+    if exists(f"{html_folder}\\favicon.ico"):
+        _build_favicon(html_folder, include_folder)
+        print("Built \"favicon.ico\"")
 
     for html_filepath in glob(f"{html_folder}\\*.html"):
         _build_html(html_filepath, include_folder)
