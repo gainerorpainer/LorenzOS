@@ -20,8 +20,8 @@ class SerializableBuilder(AbstractBuilder):
     STRUCT_FIELD_RE = re.compile(
         r"(\w+)\s+(\w+)(?:\[\w*\])?(?:\s*=\s*.*)?(?:\s*{.*})?;")
 
-    def __init__(self, include_folder: str):
-        super().__init__("serializable", include_folder)
+    def __init__(self, include_folder: str, source_folder: str):
+        super().__init__("serializable", include_folder, source_folder)
         classes = self._search_classes("is_serializable_class")
         serialization_functions = self._search_functions(
             "serialization_extension_for")

@@ -1,4 +1,5 @@
 """Base class for all builders"""
+from genericpath import exists
 import re
 from glob import glob
 from itertools import repeat
@@ -51,26 +52,31 @@ class AbstractBuilder:
     ATTR_CLASS_RE = re.compile(
         r"(?:struct|class)\s+" + _ATTRIBUTE_RE + r"\s+(.*)\s+{(?:.|\n)*}")
 
-    def __init__(self, context: str, include_folder: str):
+    def __init__(self, context: str, include_folder: str, source_folder: str):
         self.context = context
         self.include_folder = include_folder
+        self.source_folder = source_folder
         self.do_not_build = False
 
     def _generate_block(self, blockname: str, indentation: str) -> list[str]:
         raise NotImplementedError("Abstract function")
 
     def build(self):
-        """Builds a codegen_*.h file into a single file
+        """Builds codegen_*.h and codegen_*.cpp files
         """
         if self.do_not_build:
             print("Nothing to build, skipping")
             return
 
-        out_header_filepath = f"{self.include_folder}\\codegen_{self.context}.h"
-        with open(f"codegen_{self.context}.h", "r", encoding="utf8") as templatefile, open(out_header_filepath, "w+", encoding="utf8") as sourcefile:
-            sourcefile.writelines(AbstractBuilder._build_template(
-                templatefile.readlines(), self._generate_block))
-        print(f"Built header file: {out_header_filepath}")
+        for folder, ext in zip([self.include_folder, self.source_folder], [".h", ".cpp"]):
+            in_filepath = f"codegen_{self.context}{ext}"
+            if not exists(in_filepath):
+                continue
+            out_filepath = f"{folder}\\codegen_{self.context}{ext}"
+            with open(in_filepath, "r", encoding="utf8") as templatefile, open(out_filepath, "w+", encoding="utf8") as sourcefile:
+                sourcefile.writelines(AbstractBuilder._build_template(
+                    templatefile.readlines(), self._generate_block))
+            print(f"Built file: {out_filepath}")
 
     def __search_objects(self, regex: re.Pattern[str]) -> list[_SearchResult]:
         result = []  # type: list[_SearchResult]
@@ -97,7 +103,8 @@ class AbstractBuilder:
 
             # find all objects
             for obj_match in regex.finditer(content):
-                result.append(_SearchResult(Path(file_path).name, obj_match, namespaces))
+                result.append(_SearchResult(
+                    Path(file_path).name, obj_match, namespaces))
         return result
 
     def _search_functions(self, attribute_name: str) -> list[_AttributedFunction]:
@@ -129,7 +136,8 @@ class AbstractBuilder:
                 (namespace for namespace in obj.namespaces if span[0] >= namespace.start and span[1] <= namespace.end), None)
             qualifiers = [
                 containing_namespace.qualified_name if containing_namespace else ""] + [obj.match[3]]
-            obj = _AttributedClass(obj.filename, span, obj.match[2], obj.match[3], "::".join(qualifiers))
+            obj = _AttributedClass(
+                obj.filename, span, obj.match[2], obj.match[3], "::".join(qualifiers))
             objects.append(obj)
         return objects
 

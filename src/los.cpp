@@ -55,6 +55,9 @@ namespace LOS
 
     void setup()
     {
+        // Initialize the LED_BUILTIN pin as an output
+        pinMode(LED_BUILTIN, OUTPUT);
+
         // activate Serial
         Serial.begin(115200);
         Serial.println();
@@ -93,10 +96,10 @@ namespace LOS
 
         // 404
         _HttpServer.onNotFound([]()
-                              { _HttpServer.send(404, "text/plain", "Not Found"); });
+                               { _HttpServer.send(404, "text/plain", "Not Found"); });
         // logging
         _HttpServer.addHook([](const String &method, const String &url, WiFiClient *client, ESP8266WebServer::ContentTypeFunction contentType)
-                           { Serial.printf("HTML %s %s\n", method.c_str(), url.c_str());
+                            { Serial.printf("HTML %s %s\n", method.c_str(), url.c_str());
                   return ESP8266WebServer::CLIENT_REQUEST_CAN_CONTINUE; });
         _HttpServer.begin();
 
