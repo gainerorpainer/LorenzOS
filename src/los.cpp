@@ -65,7 +65,7 @@ namespace LOS
         // wifi setup
         WiFi.mode(WIFI_STA);
         // stay connected to wifi
-        WiFi.persistent(true);
+        WiFi.persistent(false);
         if (!_Storage.WifiConfig.HostName.isEmpty())
             WiFi.hostname(_Storage.WifiConfig.HostName.c_str());
         WiFi.begin(_Storage.WifiConfig.SSID.c_str(), _Storage.WifiConfig.Password.c_str());
