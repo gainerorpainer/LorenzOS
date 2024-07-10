@@ -62,9 +62,13 @@ namespace LOS
         Serial.begin(115200);
         Serial.println();
 
+        Serial.println("Storage values:");
+        Serial.printf("\tSSID: %s\n", _Storage.WifiConfig.SSID.c_str());
+        Serial.printf("\tPW: %s\n", _Storage.WifiConfig.Password.c_str());
+        Serial.printf("\tHostname: %s\n", _Storage.WifiConfig.HostName.c_str());
+
         // wifi setup
         WiFi.mode(WIFI_STA);
-        // stay connected to wifi
         WiFi.persistent(false);
         if (!_Storage.WifiConfig.HostName.isEmpty())
             WiFi.hostname(_Storage.WifiConfig.HostName.c_str());
