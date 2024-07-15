@@ -46,4 +46,4 @@ class HttpServerBuilder(AbstractBuilder):
             case "buildnumber":
                 return [str(self.build_number)]
             case "versionstr":
-                return [f"\"{self.version}_{self.build_number}\""]
+                return [f"\"{self.version}_{self.build_number:03}\""]

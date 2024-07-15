@@ -1,6 +1,13 @@
 #pragma once
 
+#include <CycleLimit.h>
+
+/* _CODEGENERATED_INCLUDES */
+
 namespace codegen::Tasks
 {
-    void loop();
+    static inline void loop()
+    {
+        /* _CODEGENERATED_FCALLS */
+    }
 }
