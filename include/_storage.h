@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 #include <CRC.h>
 
-#include "structstr.h"
+#include "_structstr.h"
 
 namespace LOS::Storage
 {

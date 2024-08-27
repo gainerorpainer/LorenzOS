@@ -37,7 +37,8 @@ Additionally, automatic build tools are added to the project during installation
   * removed buildnumbers, which would have the project rebuild each time
   * instead used build-date as auto-generated version subnumber
 * added `/os` http ressource, which gives information about the OS like the hostname
-
+* renamed headers to make it clear that they should not be included from externally
+  
 ### 1.2.0
 
 * **Breaking Change**: `serializable` can not be "read-only", which can be controlled by the passed attribute argument

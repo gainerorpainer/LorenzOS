@@ -17,6 +17,7 @@
         "espressif8266"
     ],
     "dependencies": {
+        "ArduinoJson": "*",
         "arduino-libraries/ntpclient": "*",
         "ArduinoOTA": "*",
         "robtillaart/CRC": "*",
