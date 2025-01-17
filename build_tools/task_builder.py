@@ -28,12 +28,16 @@ class TaskBuilder(AbstractBuilder):
 
     def _generate_block(self, blockname: str, _: str) -> list[str]:
         match blockname:
-            case "fcalls":
+            case "loop":
                 lines = []  # type: list[str]
                 for task in self.tasks:
                     lines.extend([f"static CycleLimit::CycleLimit {task.name}_cl_limit" + "{" + str(task.interval) +"};",
                                   f"if ({task.name}_cl_limit.IsCycleCooledDown())",
                                   f"\t{task.qualified_name}();"])
+            case "once":
+                lines = []  # type: list[str]
+                for task in self.tasks:
+                    lines.append(f"\t{task.qualified_name}();")
                 return lines
             case "includes":
                 return [f"#include \"{headerfile}\"" for headerfile in self.header_files]

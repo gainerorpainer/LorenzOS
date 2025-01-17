@@ -31,6 +31,10 @@ Additionally, automatic build tools are added to the project during installation
 
 ## changelog
 
+### 1.2.2
+
+* added `call_once()` method for tasks to run all tasks at once
+
 ### 1.2.1
 
 * changed the way how the `/version` mechanism works

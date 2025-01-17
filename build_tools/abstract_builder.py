@@ -47,8 +47,7 @@ class AbstractBuilder:
     CODEGENERATED_RE = re.compile(r"\/\* _CODEGENERATED_(.*?) (?:(.*) )?\*\/")
     NAMESPACE_RE = re.compile(r"namespace (.*?)\s*\{((?:.*\n.*)+)\}")
     _ATTRIBUTE_RE = r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]"
-    ATTR_FUNCTION_RE = re.compile(
-        r"\[\[(\w+)(?:\(((?:[\w]+)|(?:\".*\"))\))?\]\]\s+(\w+)\s+(\w+)\((.*)\);")
+    ATTR_FUNCTION_RE = re.compile(_ATTRIBUTE_RE + r"\s+(\w+)\s+(\w+)\((.*)\);")
     ATTR_CLASS_RE = re.compile(
         r"(?:struct|class)\s+" + _ATTRIBUTE_RE + r"\s+(.*)\s+{(?:.|\n)*}")
 
