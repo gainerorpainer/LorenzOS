@@ -34,10 +34,11 @@ class TaskBuilder(AbstractBuilder):
                     lines.extend([f"static CycleLimit::CycleLimit {task.name}_cl_limit" + "{" + str(task.interval) +"};",
                                   f"if ({task.name}_cl_limit.IsCycleCooledDown())",
                                   f"\t{task.qualified_name}();"])
+                return lines
             case "once":
                 lines = []  # type: list[str]
                 for task in self.tasks:
-                    lines.append(f"\t{task.qualified_name}();")
+                    lines.append(f"{task.qualified_name}();")
                 return lines
             case "includes":
                 return [f"#include \"{headerfile}\"" for headerfile in self.header_files]
