@@ -4,7 +4,7 @@
 /// @return true if successful
 bool tryParse(char const *in, /* _CODEGENERATED_QUALIFIED_TYPE */ &out)
 {
-    JsonDocument doc{};
+    JsonDocument doc;
     DeserializationError const error = deserializeJson(doc, in);
     if (error)
         return false;

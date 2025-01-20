@@ -6,7 +6,7 @@ int serialize(/* _CODEGENERATED_QUALIFIED_TYPE */ const &in, String &out)
 {
     // reset buffer just in case
     out.clear();
-    JsonDocument doc{};
+    JsonDocument doc;
 
     /* _CODEGENERATED_WRITE */
 

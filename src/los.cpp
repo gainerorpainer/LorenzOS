@@ -147,7 +147,7 @@ namespace LOS
         }
 
         // handle io in "realtime"
-        static WifiSetup::WifiConfig wifiConfig{};
+        static WifiSetup::WifiConfig wifiConfig{.SSID = _Storage.WifiConfig.SSID.asStr(), .Password = _Storage.WifiConfig.Password.asStr(), .Hostname = _Storage.WifiConfig.HostName.asStr()};
         if (SerialWifiSetup.checkInput(wifiConfig))
         {
             // copy over to permanent storage
