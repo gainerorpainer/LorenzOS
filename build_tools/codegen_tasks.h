@@ -13,6 +13,8 @@ namespace codegen::Tasks
 
     static inline void loop()
     {
+        CycleLimit::Time_t const now = millis();
+        
         /* _CODEGENERATED_LOOP */
     }
 }

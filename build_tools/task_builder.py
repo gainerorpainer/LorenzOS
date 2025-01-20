@@ -32,7 +32,7 @@ class TaskBuilder(AbstractBuilder):
                 lines = []  # type: list[str]
                 for task in self.tasks:
                     lines.extend([f"static CycleLimit::CycleLimit {task.name}_cl_limit" + "{" + str(task.interval) +"};",
-                                  f"if ({task.name}_cl_limit.IsCycleCooledDown())",
+                                  f"if ({task.name}_cl_limit.IsCycleCooledDown(now))",
                                   f"\t{task.qualified_name}();"])
                 return lines
             case "once":
