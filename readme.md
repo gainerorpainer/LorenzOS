@@ -31,6 +31,13 @@ Additionally, automatic build tools are added to the project during installation
 
 ## changelog
 
+### 1.2.3
+
+* added `unsigned long getUTC()` and `double getLocalTimeOffset()` to `los.h`
+* added logging capability:
+  * to write into log, use `#include <los_log.h>` and then `LOS_LOG::log("something)`
+  * to read latest log entries, call a GET request to the `/log` route
+
 ### 1.2.2
 
 * added `call_once()` method for tasks to run all tasks at once

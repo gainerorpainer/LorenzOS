@@ -33,4 +33,12 @@ namespace LOS
     /// @brief Access the time retrieved from ntp
     /// @return the time as local time
     tmElements_t getLocalTime();
+
+    /// @brief Access the time retrieved from ntp
+    /// @return the utc time as unix timestamp
+    unsigned long getUTC();
+
+    /// @brief Access the time offset in hours between current local time and utc
+    /// @return offset between local time and utc in hours
+    double getLocalTimeOffset();
 }

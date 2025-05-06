@@ -13,10 +13,14 @@ namespace codegen::Http_Server
         // GET /version
         LOS::_HttpServer.on("/version", []()
                             { LOS::_HttpServer.send(200, "text/plain", String{/* _CODEGENERATED_VERSIONSTR */}); });
-        
+
         // GET /os
         LOS::_HttpServer.on("/os", []()
                             { LOS::_HttpServer.send(200, "application/json", LOS::Info::getInfoJson()); });
+
+        // GET /log
+        LOS::_HttpServer.on("/log", []()
+                            { LOS::_HttpServer.send(200, "application/json", LOS::Info::getLog()); });
 
         /* USER CALLBACKS */
         /* _CODEGENERATED_CALLBACKS */

@@ -184,4 +184,16 @@ namespace LOS
         breakTime(CET.toLocal(TimeClient.getEpochTime()), localTime);
         return localTime;
     }
+
+    unsigned long getUTC()
+    {
+        return TimeClient.getEpochTime();
+    }
+
+    double getLocalTimeOffset()
+    {
+        auto const utc = TimeClient.getEpochTime();
+        auto const localTime = CET.toLocal(utc);
+        return (localTime - utc) / (60.0 * 60.0);
+    }
 }
