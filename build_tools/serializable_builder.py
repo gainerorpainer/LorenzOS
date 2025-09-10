@@ -9,7 +9,7 @@ class _SerializableClass:
     name: str
     qualified_name: str
     fields: list[str]
-    is_parsable: bool
+    type: str
     qualified_extension_serialization: str = None
     qualified_extension_parsing: str = None
 
@@ -54,7 +54,7 @@ class SerializableBuilder(AbstractBuilder):
             serialization_ext_f = __find_func(serialization_functions)
             parsing_ext_f = __find_func(parsing_functions)
             self.classes.append(_SerializableClass(
-                _class.name, _class.qualified_name, fields, _class.attribute_arg == "SERIALIZABLE_AND_PARSABLE", serialization_ext_f, parsing_ext_f))
+                _class.name, _class.qualified_name, fields, _class.attribute_arg, serialization_ext_f, parsing_ext_f))
 
     def _generate_block(self, blockname: str, indentation: str) -> list[str]:
         match blockname.lower():
@@ -71,7 +71,7 @@ class SerializableBuilder(AbstractBuilder):
                     if i > 0:
                         block.append("")
                     # skip tryParse fragment if not parsable
-                    for fragment in fragments if _class.is_parsable else [fragments[0]]:
+                    for fragment in fragments if _class.type in ("TYPE_PARAMETERS", "TYPE_GENERIC") else [fragments[0]]:
                         block_lines = AbstractBuilder._build_template(
                             fragment, lambda x, _: SerializableBuilder.__generate_block_for(_class, x, indentation))
                         # remove trailing newlines
@@ -118,3 +118,5 @@ class SerializableBuilder(AbstractBuilder):
                 return lines
             case "extension_read":
                 return ["// not implemented"]
+            case "debuginfo":
+                return ["_add_debug_info(doc);"] if _class.type == "TYPE_STATUS" else []

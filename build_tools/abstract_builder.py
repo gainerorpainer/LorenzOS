@@ -1,5 +1,6 @@
 """Base class for all builders"""
 from genericpath import exists
+import inspect
 import re
 from glob import glob
 from itertools import repeat
@@ -159,7 +160,7 @@ class AbstractBuilder:
                 block_lines = block_resolver(blockname, indentation)
                 if block_lines is None:
                     raise NotImplementedError(
-                        f"{repr(block_resolver)} does not resolve the blockname \"{blockname}\"")
+                        f"{repr(block_resolver)} ({inspect.getfile(block_resolver)}) does not resolve the blockname \"{blockname}\"")
                 if len(block_lines) == 0:
                     continue
                 if len(block_lines) == 1:

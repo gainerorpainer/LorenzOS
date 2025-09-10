@@ -1,11 +1,20 @@
 #pragma once
 
+#include "los.h"
+
 #include <ArduinoJson.h>
 
 /* _CODEGENERATED_INCLUDES */
 
 namespace codegen::Serializable
 {
+    static void _add_debug_info(JsonDocument &doc)
+    {
+        doc["NumReconnects"] = LOS::_NumWifiReconnects;
+        doc["UpTimeSeconds"] = millis() / 1000;
+        doc["FreeHeap"] = ESP.getFreeHeap();
+    }
+
     /* _CODEGENERATED_PLACEHOLDER BEGIN */
     /// @brief Turns parameters into json
     /// @param in the parameters to serialze

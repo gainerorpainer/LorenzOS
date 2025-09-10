@@ -4,6 +4,8 @@
 
 #include <los.h>
 
+#include "codegen_html.h"
+
 /* _CODEGENERATED_INCLUDES */
 
 namespace codegen::Http_Server
@@ -21,6 +23,13 @@ namespace codegen::Http_Server
         // GET /log
         LOS::_HttpServer.on("/log", []()
                             { LOS::_HttpServer.send(200, "application/json", LOS::Info::getLog()); });
+
+        // GET /
+        LOS::_HttpServer.on("/", []()
+                            { LOS::_HttpServer.send(200, "text/html", STATIC_HTML_MAINPAGE, sizeof(STATIC_HTML_MAINPAGE)); });
+        // GET /favicon.ico
+        LOS::_HttpServer.on("/favicon.ico", []()
+                            { LOS::_HttpServer.send(200, "image/x-icon", STATIC_HTML_FAVICON_CONTENT, sizeof(STATIC_HTML_FAVICON_CONTENT)); });
 
         /* USER CALLBACKS */
         /* _CODEGENERATED_CALLBACKS */
