@@ -96,7 +96,8 @@ class SerializableBuilder(AbstractBuilder):
             case "write":
                 lines = [f'{indentation}doc["{field}"] = in.{field};' for field in _class.fields]
                 # remove indentation from first item
-                lines[0] = lines[0][len(indentation):]
+                if len(lines) > 0:
+                    lines[0] = lines[0][len(indentation):]
                 return lines
             case "extension_write":
                 return [] if _class.qualified_extension_serialization is None else [f"{_class.qualified_extension_serialization}(doc);"]

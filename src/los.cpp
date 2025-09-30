@@ -196,4 +196,9 @@ namespace LOS
         auto const localTime = CET.toLocal(utc);
         return (localTime - utc) / (60.0 * 60.0);
     }
+
+    bool getIsWifiConnected()
+    {
+        return WiFi.status() == WL_CONNECTED;
+    }
 }

@@ -41,4 +41,8 @@ namespace LOS
     /// @brief Access the time offset in hours between current local time and utc
     /// @return offset between local time and utc in hours
     double getLocalTimeOffset();
+
+    /// @brief Check wifi connect status
+    /// @return true if connected & alive
+    bool getIsWifiConnected();
 }
