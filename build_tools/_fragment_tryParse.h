@@ -2,7 +2,7 @@
 /// @param in the string to parse
 /// @param out unchanged or if true is returned, the parsed data
 /// @return true if successful
-bool tryParse(char const *in, /* _CODEGENERATED_QUALIFIED_TYPE */ &out)
+static inline bool tryParse(char const *in, /* _CODEGENERATED_QUALIFIED_TYPE */ &out)
 {
     JsonDocument doc;
     DeserializationError const error = deserializeJson(doc, in);

@@ -2,32 +2,33 @@
 
 namespace LOS::StateMachine
 {
-    void State::OnEnter()
-    {
-        // left empty intentionally
-    }
 
     State::State(StringT const &stateName) : StateName{stateName}
     {
     }
 
     Machine::Machine(State::OwningPtr initialState)
-        : CurrentState{std::unique_ptr<State>{new InitialState{std::move(initialState)}}}
+        : CurrentState{std::unique_ptr<State>{new InitialState{initialState}}}
     {
     }
 
     bool Machine::Advance()
     {
         // Machine ended?
-        if (typeid(*CurrentState) == typeid(EndState))
-            return false;
-
-        // Machine stuck?
-        if (IsStuck())
+        if (HasEnded())
             return false;
 
         // advance counter
         IterationCounter++;
+
+        if (MaxIterations > 0 && IterationCounter > MaxIterations)
+        {
+            // exceeded max iterations, go to end state with error
+            CurrentState.reset(new EndState(*CurrentState, "Exceeded max iterations"));
+            if (DebugPrint)
+                DebugPrint("Exceeded max iterations, going to end state\n");
+            return false;
+        }
 
         // check state transition for current state
         State::OwningPtr nextState = nullptr;
@@ -38,8 +39,7 @@ namespace LOS::StateMachine
         {
             CurrentState.reset(nextState);
             if (DebugPrint)
-                DebugPrint("Entering State \"" + CurrentState->StateName + "\"\n");
-            CurrentState->OnEnter();
+                DebugPrint("Switchting state to \"" + CurrentState->StateName + "\"\n");
         }
 
         return true;
@@ -55,9 +55,16 @@ namespace LOS::StateMachine
         MaxIterations = max;
     }
 
-    bool Machine::IsStuck()
+    StringT Machine::HasError()
     {
-        return (typeid(*CurrentState) != typeid(EndState)) && (IterationCounter == MaxIterations);
+        if (!HasEnded())
+            return "";
+        return ((EndState *)(CurrentState.get()))->HasError;
+    }
+
+    bool Machine::HasEnded()
+    {
+        return CurrentState->StateName == EndState::STATIC_NAME;
     }
 
     unsigned int Machine::GetIterationCounter()
@@ -80,7 +87,7 @@ namespace LOS::StateMachine
         ;
     }
 
-    EndState::EndState() : State{"[[END]]"}
+    EndState::EndState(State const &lastState, StringT const &error) : State{STATIC_NAME}, LastState{lastState.StateName}, HasError{error}
     {
     }
 

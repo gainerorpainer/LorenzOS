@@ -11,22 +11,17 @@ namespace LOS::StateMachine
 
     class State
     {
-        /// @brief StateMachine may access protected functions
+        /// @brief Machine may access protected functions
         friend class Machine;
 
     public:
         using OwningPtr = State *;
 
-    private:
         StringT const StateName;
+        State(StringT const &stateName);
 
     protected:
-        virtual void OnEnter();
-
         virtual void StateTransition(OwningPtr &nextState) = 0;
-
-    public:
-        State(StringT const &stateName);
     };
 
     class InitialState : public State
@@ -47,7 +42,12 @@ namespace LOS::StateMachine
         void StateTransition(State::OwningPtr &nextState) override;
 
     public:
-        EndState();
+        StringT const LastState;
+        StringT const HasError;
+
+        EndState(State const &lastState, StringT const &error = "");
+
+        inline static StringT const STATIC_NAME{"ENDSTATE"};
     };
 
     class Machine
@@ -75,9 +75,13 @@ namespace LOS::StateMachine
         /// @param max how many iterations before state machine is labeled as stuck
         void SetMaxIterations(unsigned int max);
 
-        /// @brief Check if statemachine is stuck
-        /// @return true if iteration limit has been reached
-        bool IsStuck();
+        /// @brief Check if statemachine ran into error
+        /// @return contains error message or is empty
+        StringT HasError();
+
+        /// @brief Check if statemachine has ended
+        /// @return true if state == endstate
+        bool HasEnded();
 
         /// @brief Get how many iterations this statemachine has processed
         /// @return number of iterations

@@ -8,7 +8,7 @@
 
 namespace codegen::Serializable
 {
-    static void _add_debug_info(JsonDocument &doc)
+    static inline void _add_debug_info(JsonDocument &doc)
     {
         doc["NumReconnects"] = LOS::_NumWifiReconnects;
         doc["UpTimeSeconds"] = millis() / 1000;
@@ -21,7 +21,7 @@ namespace codegen::Serializable
     /// @param out will be cleared and written to
     /// @return the length of the string
     template <typename T>
-    int serialize(T const &in, String &out)
+    static inline serialize(T const &in, String &out)
     {
         return 0;
     }
@@ -31,7 +31,7 @@ namespace codegen::Serializable
     /// @param out unchanged or if true is returned, the parsed data
     /// @return true if successful
     template <typename T>
-    bool tryParse(char const *in, T &out)
+    static inline tryParse(char const *in, T &out)
     {
         return false;
     }

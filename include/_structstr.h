@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstring>
+#include <Arduino.h>
 
 #include <array>
 
@@ -36,7 +36,7 @@ namespace LOS
             return *this;
         }
 
-        String asStr()
+        String asStr() const
         {
             // is zero terminated by design
             return String{Data.begin()};
@@ -48,7 +48,7 @@ namespace LOS
             return Data.begin();
         }
 
-        bool isEmpty()
+        bool isEmpty() const
         {
             return Data.front() == '\0';
         }
